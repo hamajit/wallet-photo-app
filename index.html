@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4x6 Photo Grid Generator</title>
+    <meta name="description" content="端末内で完結する4x6アスペクトのウォレットサイズ写真メーカー">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Wallet Photo Grid</h1>
+            <p>スマホの写真から4x6サイズの4枚組画像を自動生成</p>
+        </header>
+
+        <main>
+            <div class="upload-section" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*" class="hidden">
+                <label for="file-input" class="upload-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    写真を選択
+                </label>
+                <p class="hint">または写真をここにドロップ</p>
+            </div>
+
+            <div class="preview-section hidden" id="preview-section">
+                <div class="canvas-wrapper">
+                    <canvas id="result-canvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="download-btn" class="download-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        画像を保存
+                    </button>
+                    <button id="reset-btn" class="reset-btn">
+                        別の写真を選ぶ
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
