@@ -59,7 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (outputUrl) URL.revokeObjectURL(outputUrl);
             outputUrl = URL.createObjectURL(blob);
             outputFile = new File([blob], 'wallet-photo.jpg', { type: 'image/jpeg' });
-            image.src = outputUrl;
+            await new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = () => reject(new Error('プレビューを表示できませんでした。もう一度お試しください。'));
+                image.src = outputUrl;
+            });
+            if (current !== generation) return;
             dropZone.classList.add('hidden');
             preview.classList.remove('hidden');
         } catch (error) {
