@@ -12,28 +12,30 @@
     <div class="app-container">
         <header>
             <h1>Wallet Photo Grid</h1>
-            <p>スマホの写真から4x6サイズの4枚組画像を自動生成</p>
+            <p>1〜4枚の写真から4x6サイズの画像を作成</p>
         </header>
 
         <main>
             <div class="upload-section" id="drop-zone">
-                <input type="file" id="file-input" accept="image/*" class="hidden">
+                <input type="file" id="file-input" accept="image/*" multiple class="hidden">
                 <label for="file-input" class="upload-btn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     写真を選択
                 </label>
-                <p class="hint">または写真をここにドロップ</p>
+                <p class="hint">最大4枚まで選択できます。4枚未満の場合は繰り返して配置します。</p>
             </div>
 
             <div class="preview-section hidden" id="preview-section">
                 <div class="canvas-wrapper">
-                    <canvas id="result-canvas"></canvas>
+                    <img id="result-image" alt="作成した4枚組画像のプレビュー">
+                    <canvas id="result-canvas" class="hidden"></canvas>
                 </div>
                 <div class="controls">
                     <button id="download-btn" class="download-btn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        画像を保存
+                        共有して画像を保存
                     </button>
+                    <p class="hint">iPhoneでは共有メニューの「画像を保存」を選択。共有できない場合は画像を長押しして保存できます。</p>
                     <button id="reset-btn" class="reset-btn">
                         別の写真を選ぶ
                     </button>

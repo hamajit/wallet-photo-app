@@ -1,137 +1,101 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('file-input');
+    const input = document.getElementById('file-input');
     const dropZone = document.getElementById('drop-zone');
-    const previewSection = document.getElementById('preview-section');
+    const preview = document.getElementById('preview-section');
     const canvas = document.getElementById('result-canvas');
+    const image = document.getElementById('result-image');
+    const save = document.getElementById('download-btn');
     const ctx = canvas.getContext('2d');
-    const downloadBtn = document.getElementById('download-btn');
-    const resetBtn = document.getElementById('reset-btn');
+    canvas.width = 1200;
+    canvas.height = 1800;
+    let outputUrl = null;
+    let outputFile = null;
+    let generation = 0;
 
-    // Canvas size for 4x6 at 300 DPI (1200x1800 pixels)
-    // Wallet size output (2 cols x 2 rows = 4 photos)
-    const CANVAS_WIDTH = 1200;
-    const CANVAS_HEIGHT = 1800;
-
-    // Each photo cell dimension in the grid
-    const CELL_WIDTH = CANVAS_WIDTH / 2;
-    const CELL_HEIGHT = CANVAS_HEIGHT / 2;
-
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-
-    // Handle Drag and Drop events
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    function loadImage(file) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+            img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('画像を読み込めませんでした。別の画像を選んでください。')); };
+            img.src = url;
+        });
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        if (files.length) handleFile(files[0]);
-    });
-
-    // Handle standard click upload
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length) handleFile(e.target.files[0]);
-    });
-
-    function handleFile(file) {
-        if (!file.type.startsWith('image/')) {
-            alert('画像ファイルを選択してください。');
+    async function handleFiles(fileList) {
+        const files = Array.from(fileList);
+        if (!files.length) return;
+        if (files.length > 4 || files.some(file => !file.type.startsWith('image/'))) {
+            alert('画像を1〜4枚選択してください。');
+            input.value = '';
             return;
         }
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => processImage(img);
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function processImage(img) {
-        // Clear canvas with white background
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        // Aspect ratio for each cell (600x900 = 2:3)
-        const cellAspect = CELL_WIDTH / CELL_HEIGHT;
-        const imgAspect = img.width / img.height;
-
-        let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height;
-
-        // Crop center of the image to perfectly fit the 2:3 cell
-        if (imgAspect > cellAspect) {
-            // Original is wider, crop horizontal centers
-            srcW = img.height * cellAspect;
-            srcX = (img.width - srcW) / 2;
-        } else {
-            // Original is taller, crop vertical centers
-            srcH = img.width / cellAspect;
-            srcY = (img.height - srcH) / 2;
-        }
-
-        // Add padding inside cells if desired (e.g., 10px white border for easier cutting)
-        const padding = 16;
-        const drawW = CELL_WIDTH - padding;
-        const drawH = CELL_HEIGHT - padding;
-
-        // Draw 2x2 grid
-        for (let row = 0; row < 2; row++) {
-            for (let col = 0; col < 2; col++) {
-                const destX = col * CELL_WIDTH + padding / 2;
-                const destY = row * CELL_HEIGHT + padding / 2;
-                ctx.drawImage(img, srcX, srcY, srcW, srcH, destX, destY, drawW, drawH);
+        const current = ++generation;
+        try {
+            const images = await Promise.all(files.map(loadImage));
+            if (current !== generation) return;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < 4; i++) {
+                const img = images[i % images.length];
+                const width = 584, height = 884;
+                const aspect = width / height;
+                let sw = img.width, sh = img.height;
+                if (sw / sh > aspect) sw = sh * aspect;
+                else sh = sw / aspect;
+                ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh,
+                    (i % 2) * 600 + 8, Math.floor(i / 2) * 900 + 8, width, height);
             }
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([15, 15]);
+            ctx.beginPath();
+            ctx.moveTo(600, 0); ctx.lineTo(600, 1800);
+            ctx.moveTo(0, 900); ctx.lineTo(1200, 900);
+            ctx.stroke();
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+            if (current !== generation) return;
+            if (!blob) throw new Error('画像を作成できませんでした。');
+            if (outputUrl) URL.revokeObjectURL(outputUrl);
+            outputUrl = URL.createObjectURL(blob);
+            outputFile = new File([blob], 'wallet-photo.jpg', { type: 'image/jpeg' });
+            image.src = outputUrl;
+            dropZone.classList.add('hidden');
+            preview.classList.remove('hidden');
+        } catch (error) {
+            if (current === generation) { alert(error.message); input.value = ''; }
         }
-
-        // Draw subtle cut-lines (guidelines) in the center
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([15, 15]);
-
-        ctx.beginPath();
-        ctx.moveTo(CANVAS_WIDTH / 2, 0);
-        ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, CANVAS_HEIGHT / 2);
-        ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT / 2);
-        ctx.stroke();
-
-        // Switch UI to show preview
-        dropZone.classList.add('hidden');
-        previewSection.classList.remove('hidden');
     }
 
-    // Handle Download
-    downloadBtn.addEventListener('click', () => {
-        const link = document.createElement('a');
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        link.download = `wallet-photo-${timestamp}.jpg`;
-        link.href = canvas.toDataURL('image/jpeg', 0.95);
-        link.click();
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, event => { event.preventDefault(); event.stopPropagation(); });
     });
-
-    // Handle Reset
-    resetBtn.addEventListener('click', () => {
-        previewSection.classList.add('hidden');
+    ['dragenter', 'dragover'].forEach(name => dropZone.addEventListener(name, () => dropZone.classList.add('dragover')));
+    ['dragleave', 'drop'].forEach(name => dropZone.addEventListener(name, () => dropZone.classList.remove('dragover')));
+    dropZone.addEventListener('drop', event => handleFiles(event.dataTransfer.files));
+    input.addEventListener('change', () => handleFiles(input.files));
+    save.addEventListener('click', async () => {
+        if (!outputFile) return;
+        const data = { files: [outputFile] };
+        if (navigator.share && navigator.canShare && navigator.canShare(data)) {
+            try { await navigator.share(data); } catch (error) {
+                if (error.name !== 'AbortError') alert('共有できませんでした。画像を長押しして保存してください。');
+            }
+        } else {
+            const link = document.createElement('a');
+            link.href = outputUrl;
+            link.download = outputFile.name;
+            link.click();
+        }
+    });
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        generation++;
+        preview.classList.add('hidden');
         dropZone.classList.remove('hidden');
-        fileInput.value = ''; // Reset input to allow re-uploading the same file
+        input.value = '';
+        image.removeAttribute('src');
+        if (outputUrl) URL.revokeObjectURL(outputUrl);
+        outputUrl = null;
+        outputFile = null;
     });
 });
