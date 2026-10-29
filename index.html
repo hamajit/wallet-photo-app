@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4x6 Photo Grid Generator</title>
-    <meta name="description" content="端末内で完結する4x6アスペクトのウォレットサイズ写真メーカー">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <meta name="description" content="Create a 4×6 wallet photo grid on your device">
+    <link rel="stylesheet" href="styles.css?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         <header>
+            <label class="language-label" for="language">Language / 言語</label>
+            <select id="language" aria-label="Language"><option value="en">English</option><option value="ja">日本語</option><option value="zh">中文（简体）</option><option value="es">Español</option><option value="ko">한국어</option></select>
             <h1>Wallet Photo Grid</h1>
-            <p>1〜4枚の写真から4x6サイズの画像を作成</p>
+            <p data-i18n="description">Create a 4×6 photo grid from 1–4 photos</p>
         </header>
 
         <main>
@@ -20,29 +22,29 @@
                 <input type="file" id="file-input" accept="image/*" multiple class="hidden">
                 <label for="file-input" class="upload-btn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    写真を選択
+                    <span data-i18n="select">Choose photos</span>
                 </label>
-                <p class="hint">最大4枚まで選択できます。4枚未満の場合は繰り返して配置します。</p>
+                <p class="hint" data-i18n="hint">Choose up to 4 photos. Fewer than 4 will repeat to fill the grid.</p>
             </div>
 
             <div class="preview-section hidden" id="preview-section">
                 <div class="canvas-wrapper">
-                    <img id="result-image" alt="作成した4枚組画像のプレビュー">
+                    <img id="result-image" alt="Preview of the four-photo grid">
                     <canvas id="result-canvas" class="hidden"></canvas>
                 </div>
                 <div class="controls">
                     <button id="download-btn" class="download-btn">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        共有して画像を保存
+                        <span data-i18n="save">Share and save image</span>
                     </button>
-                    <p class="hint">iPhoneでは共有メニューの「画像を保存」を選択。共有できない場合は画像を長押しして保存できます。</p>
+                    <p class="hint" data-i18n="saveHint">On iPhone, select “Save Image” in the share menu. You can also touch and hold the image to save it.</p>
                     <button id="reset-btn" class="reset-btn">
-                        別の写真を選ぶ
+                        <span data-i18n="reset">Choose different photos</span>
                     </button>
                 </div>
             </div>
         </main>
     </div>
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>

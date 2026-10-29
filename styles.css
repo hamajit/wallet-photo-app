@@ -204,3 +204,6 @@ header p {
         padding: 40px 16px;
     }
 }
+
+.language-label { color: var(--text-muted); font-size: 13px; margin-right: 6px; }
+#language { background: #222b38; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 6px; margin-bottom: 20px; }
